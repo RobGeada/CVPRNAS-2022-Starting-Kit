@@ -2,10 +2,20 @@ import json
 import numpy as np
 import pickle as pkl
 import os
+import sentry_sdk
 
 from sklearn.metrics import accuracy_score
 
 if __name__ == '__main__':
+
+    sentry_sdk.init(
+        "https://038f39e3bc2a46fabc02b955d6c319e8@o1080315.ingest.sentry.io/6227751",
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0
+    )
+
     # print main header
     print("=" * 75)
     print("="*13 + "    Your CVPR-NAS 2022 Submission is scoring     " + "="*13)
