@@ -38,5 +38,7 @@ Additionally, each dataset will be accompanied by a metadata dictionary, that co
 ## Designing your Pipeline
 Each of three pipeline classes (`DataProcessor`, `NAS`, and `Trainer`) will receive the dataset metadata dictionary in their initialization. You can alter this however you want, in case you want to pass messages between your various classes. 
 
+Make sure to evaluate your pipeline over a variety of datasets, to ensure that it is flexible enough to work well on a variety of tasks. Make sure not to specifically tailor your pipeline to the datasets bundled with the Starting Kit, because none of them will appear in the final evaluation round. The three datasets that we will use to evaluate your submission have been designed from scratch for this competition and will be kept secret until after the competition. 
+
 ## Runtime
 Your submission will have **24 hours total** to run on our servers. That means it needs to perform the entire NAS pipeline, training, and test prediction for each of the three final datasets within 24 hours. If your submission exceeds this time, it will be instantly terminated and will receive no score. To help you keep aware of this, the evaluation pipeline will add a field to the metadata dictionary called `time_remaining`. This is an **estimate** of the remaining time your submission has in seconds. You can use this to early-stop your algorithm, tailor your training epochs, adjust your search algorithm, it's up to you. 
