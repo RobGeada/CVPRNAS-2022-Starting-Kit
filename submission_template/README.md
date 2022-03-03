@@ -24,7 +24,7 @@ For a valid submission, you are asked to implement the following functions withi
  
 # General Information and Tips
 ## Datasets
-Each of three datasets in the competition will be an n-class classification task over 4-d images of shape (NImages x Channels X Height x Width). Each dataset 
+Each of three datasets in the competition will be an n-class classification task over 4-d images of shape (`#Images`,`Channels`,`Height`,`Width`). Each dataset 
 has a pre-divided splits for training, validation, and testing, each of which are labelled accordingly. Each class is equally represented in each split; for example, in a 5-class dataset, each split will be 20% class-0, 20% class-1, etc. 
 
 Additionally, each datasets will contain a metadata dictionary, that contains the following information:
