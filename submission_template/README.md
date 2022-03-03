@@ -23,11 +23,13 @@ For a valid submission, you are asked to implement the following functions withi
  4. Fully-trained model + Test Dataloader -> `Trainer.predict=` -> Predictions
  
 # General Information and Tips
+A great place to start is to look at the template and example submissions, to get an idea of what each of three files we're asking you to write should look like. 
+
 ## Datasets
 Each of three datasets in the competition will be an n-class classification task over 4-d images of shape (`#Images`,`Channels`,`Height`,`Width`). Each dataset 
 has a pre-divided splits for training, validation, and testing, each of which are labelled accordingly. Each class is equally represented in each split; for example, in a 5-class dataset, each split will be 20% class-0, 20% class-1, etc. 
 
-Additionally, each datasets will contain a metadata dictionary, that contains the following information:
+Additionally, each dataset will be accompanied by a metadata dictionary, that contains the following information:
 * `num_classes`: The total number of classes in the classification problem
 * `input_shape`: The shape of the `train_x` data. All images in each split will have the same channel count, heigh, and width, but the different splits will have different numbers of images.
 * `codename`: A unique codename for this dataset to refer to it throughout the competition.
@@ -37,4 +39,4 @@ Additionally, each datasets will contain a metadata dictionary, that contains th
 Each of three pipeline classes (`DataProcessor`, `NAS`, and `Trainer`) will receive the dataset metadata dictionary in their initialization. You can alter this however you want, in case you want to pass messages between your various classes. 
 
 ## Runtime
-Your submission will have 24 hours total to run on our servers. That means it needs to perform the entire NAS pipeline, training, and test prediction for each of the three final datasets within 24 hours. If your submission exceeds this time, it will be instantly terminated and will receive no score. To help you keep aware of this, the evaluation pipeline will add a field to the metadata dictionary called `time_remaining`. This is an **estimate** of the remaining time your submission has in seconds. You can use this to early-stop your algorithm, tailor your training epochs, adjust your search algorithm, it's up to you. 
+Your submission will have **24 hours total** to run on our servers. That means it needs to perform the entire NAS pipeline, training, and test prediction for each of the three final datasets within 24 hours. If your submission exceeds this time, it will be instantly terminated and will receive no score. To help you keep aware of this, the evaluation pipeline will add a field to the metadata dictionary called `time_remaining`. This is an **estimate** of the remaining time your submission has in seconds. You can use this to early-stop your algorithm, tailor your training epochs, adjust your search algorithm, it's up to you. 
