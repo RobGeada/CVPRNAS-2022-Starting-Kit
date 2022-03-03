@@ -20,7 +20,7 @@ For a valid submission, you are asked to implement the following functions withi
  1. Raw Dataset -> `DataProcessor` -> Train, Valid, and Test dataloaders
  2. Train Dataloader + Valid Dataloaders -> `NAS` -> Model
  3. Model + Train Dataloader + Valid Dataloaders -> `TRAINER.train` -> Fully-trained model
- 4. Fully-trained model + Test Dataloader -> `Trainer.predict=` -> Predictions
+ 4. Fully-trained model + Test Dataloader -> `Trainer.predict` -> Predictions
  
 # General Information and Tips
 A great place to start is to look at the template and example submissions, to get an idea of what each of three files we're asking you to write should look like. 
