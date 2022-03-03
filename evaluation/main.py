@@ -88,7 +88,7 @@ def general_num_params(model):
 # === MAIN =============================================================================================================
 # the available runtime will change at various stages of the competition, but feel free to change for local tests
 # note, this is approximate, your runtime will be controlled externally by our server
-total_runtime_hours = 2
+total_runtime_hours = 24
 total_runtime_seconds = total_runtime_hours * 60 * 60
 
 if __name__ == '__main__':
