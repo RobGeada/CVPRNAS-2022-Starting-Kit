@@ -8,8 +8,8 @@ build:
 	mkdir package/predictions
 	mkdir package/datasets
 	rsync -ar --exclude='**/test_y.npy' datasets/* package/datasets/
-	cp -R evaluation/main.py package/main.py
 	cp -R $(submission)/* package
+	cp -R evaluation/main.py package/main.py
 
 run:
 	cd package; python3 main.py
