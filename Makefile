@@ -8,6 +8,9 @@ build:
 	mkdir package/predictions
 	mkdir package/datasets
 	rsync -ar --exclude='**/test_y.npy' datasets/* package/datasets/
+	if [ -f "$(submission)/main.py" ]; then
+	    $(error ERROR: User submission contains a file named main.py. Please rename or remove any file named main.py in your submission, otherwise it will be overwritten.)
+	fi
 	cp -R $(submission)/* package
 	cp -R evaluation/main.py package/main.py
 
