@@ -32,6 +32,8 @@ if __name__ == '__main__':
         labels = np.load(os.path.join(data_path, 'test_y.npy'))
         with open(os.path.join(data_path, 'metadata'), "r") as f:
             metadata = json.load(f)
+        print(os.listdir('predictions'))
+        print(metadata['codename'])
         prediction_file = [prediction for prediction in os.listdir('predictions')
                       if metadata['codename'] == prediction.replace(".npy", "")][0]
         predictions = np.load('predictions/'+prediction_file)
