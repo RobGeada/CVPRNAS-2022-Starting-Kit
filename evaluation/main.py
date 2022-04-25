@@ -109,11 +109,15 @@ if __name__ == '__main__':
     # start tracking submission runtime
     runclock = Clock(total_runtime_seconds)
 
+    dataset_idx = 0
+    dataset_total_number = 3
     # iterate over datasets in the datasets directory
     for dataset in os.listdir("datasets"):
         # load and display data info
         (train_x, train_y), (valid_x, valid_y), (test_x), metadata = load_datasets(dataset, truncate=False)
         metadata['time_remaining'] = runclock.check()
+        metadata['dataset_index'] = dataset_idx
+        metadata['dataset_total_number'] = dataset_total_number
         this_dataset_start_time = time.time()
 
         print("="*10 + " Dataset {:^10} ".format(metadata['codename']) + "="*45)
@@ -155,4 +159,6 @@ if __name__ == '__main__':
             pkl.dump(run_data, f)
         np.save('predictions/{}.npy'.format(metadata['codename']), predictions)
         print()
+
+        dataset_idx += 1
 
