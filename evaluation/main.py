@@ -4,7 +4,6 @@ import numpy as np
 import pickle as pkl
 import os
 import time
-import sentry_sdk
 
 import torch
 from torch.utils.data import RandomSampler
@@ -88,77 +87,65 @@ def general_num_params(model):
 # === MAIN =============================================================================================================
 # the available runtime will change at various stages of the competition, but feel free to change for local tests
 # note, this is approximate, your runtime will be controlled externally by our server
-total_runtime_hours = 24
+total_runtime_hours = 2
 total_runtime_seconds = total_runtime_hours * 60 * 60
 
 if __name__ == '__main__':
+    # this try/except statement will ensure that exceptions are logged when running from the makefile
+    try:
+        # print main header
+        print("=" * 75)
+        print("="*13 + "    Your CVPR-NAS 2022 Submission is running     " + "="*13)
+        print("="*75)
 
-    sentry_sdk.init(
-        "https://038f39e3bc2a46fabc02b955d6c319e8@o1080315.ingest.sentry.io/6227751",
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0
-    )
+        # start tracking submission runtime
+        runclock = Clock(total_runtime_seconds)
 
-    # print main header
-    print("=" * 75)
-    print("="*13 + "    Your CVPR-NAS 2022 Submission is running     " + "="*13)
-    print("="*75)
+        # iterate over datasets in the datasets directory
+        for dataset in os.listdir("datasets"):
+            # load and display data info
+            (train_x, train_y), (valid_x, valid_y), (test_x), metadata = load_datasets(dataset, truncate=False)
+            metadata['time_remaining'] = runclock.check()
+            this_dataset_start_time = time.time()
 
-    # start tracking submission runtime
-    runclock = Clock(total_runtime_seconds)
+            print("="*10 + " Dataset {:^10} ".format(metadata['codename']) + "="*45)
+            print("  Metadata:")
+            [print("   - {:<20}: {}".format(k, v)) for k,v in metadata.items()]
 
-    dataset_idx = 0
-    dataset_total_number = 3
-    # iterate over datasets in the datasets directory
-    for dataset in os.listdir("datasets"):
-        # load and display data info
-        (train_x, train_y), (valid_x, valid_y), (test_x), metadata = load_datasets(dataset, truncate=False)
-        metadata['time_remaining'] = runclock.check()
-        metadata['dataset_index'] = dataset_idx
-        metadata['dataset_total_number'] = dataset_total_number
-        this_dataset_start_time = time.time()
+            # perform data processing/augmentation/etc using your DataProcessor
+            print("\n=== Processing Data ===")
+            print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
+            data_processor = DataProcessor(train_x, train_y, valid_x, valid_y, test_x, metadata)
+            train_loader, valid_loader, test_loader = data_processor.process()
+            metadata['time_remaining'] = runclock.check()
 
-        print("="*10 + " Dataset {:^10} ".format(metadata['codename']) + "="*45)
-        print("  Metadata:")
-        [print("   - {:<20}: {}".format(k, v)) for k,v in metadata.items()]
+            # check that the test_loader is configured correctly
+            assert_string = "Test Dataloader is {}, this will break evaluation. Please fix this in your DataProcessor init."
+            assert not isinstance(test_loader.sampler, RandomSampler), assert_string.format("shuffling")
+            assert not test_loader.drop_last, assert_string.format("dropping last batch")
 
-        # perform data processing/augmentation/etc using your DataProcessor
-        print("\n=== Processing Data ===")
-        print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
-        data_processor = DataProcessor(train_x, train_y, valid_x, valid_y, test_x, metadata)
-        train_loader, valid_loader, test_loader = data_processor.process()
-        metadata['time_remaining'] = runclock.check()
+            # search for best model using your NAS algorithm
+            print("\n=== Performing NAS ===")
+            print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
+            model = NAS(train_loader, valid_loader, metadata).search()
+            model_params = int(general_num_params(model))
+            metadata['time_remaining'] = runclock.check()
 
-        # check that the test_loader is configured correctly
-        assert_string = "Test Dataloader is {}, this will break evaluation. Please fix this in your DataProcessor init."
-        assert not isinstance(test_loader.sampler, RandomSampler), assert_string.format("shuffling")
-        assert not test_loader.drop_last, assert_string.format("dropping last batch")
+            # train model using your Trainer
+            print("\n=== Training ===")
+            print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
+            device = torch.device("cuda") if torch.cuda.is_available() else torch.device('cpu')
+            trainer = Trainer(model, device, train_loader, valid_loader, metadata)
+            trained_model = trainer.train()
 
-        # search for best model using your NAS algorithm
-        print("\n=== Performing NAS ===")
-        print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
-        model = NAS(train_loader, valid_loader, metadata).search()
-        model_params = int(general_num_params(model))
-        metadata['time_remaining'] = runclock.check()
-
-        # train model using your Trainer
-        print("\n=== Training ===")
-        print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device('cpu')
-        trainer = Trainer(model, device, train_loader, valid_loader, metadata)
-        trained_model = trainer.train()
-
-        # submit predictions to file
-        print("\n=== Predicting ===")
-        print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
-        predictions = trainer.predict(test_loader)
-        run_data = {'Runtime': float(np.round(time.time()-this_dataset_start_time, 2)), 'Params': model_params}
-        with open("predictions/{}_stats.pkl".format(metadata['codename']), "wb") as f:
-            pkl.dump(run_data, f)
-        np.save('predictions/{}.npy'.format(metadata['codename']), predictions)
-        print()
-
-        dataset_idx += 1
-
+            # submit predictions to file
+            print("\n=== Predicting ===")
+            print("  Allotted compute time remaining: ~{}".format(show_time(runclock.check())))
+            predictions = trainer.predict(test_loader)
+            run_data = {'Runtime': float(np.round(time.time()-this_dataset_start_time, 2)), 'Params': model_params}
+            with open("predictions/{}_stats.pkl".format(metadata['codename']), "wb") as f:
+                pkl.dump(run_data, f)
+            np.save('predictions/{}.npy'.format(metadata['codename']), predictions)
+            print()
+    except Exception as e:
+        print(e)
